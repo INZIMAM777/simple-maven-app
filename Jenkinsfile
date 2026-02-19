@@ -24,7 +24,17 @@ pipeline {
                 
                 // Bonus: Verify by reading the file back
                 bat "type user.txt"
+
+                
             }
         }
+        stage('Final Report') {
+    steps {
+        bat "date /t"             // Version 2 Task
+        bat "type user.txt"       // Version 4 Task
+        bat "echo Lab Complete > status.txt"
+        bat "type status.txt"
+    }
+}
     }
 }
