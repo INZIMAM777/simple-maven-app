@@ -1,43 +1,30 @@
 pipeline {
     agent any
-
-    tools {
-        jdk 'JDK11'
-        maven 'Maven3'
+    
+    parameters {
+        string(name: 'USERNAME', defaultValue: 'Guest', description: 'Enter your name')
     }
 
     stages {
-
         stage('Checkout') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/INZIMAM777/simple-maven-app.git'
+                // Task 1: Pulls latest code from GitHub
+                checkout scm
             }
         }
-
-        stage('Compile') {
+        
+        stage('Execute Commands') {
             steps {
-                bat 'mvn clean compile'
+                // Task 2: Print the parameter
+                echo "The user is: ${params.USERNAME}"
+                
+                // Task 3: Use BAT to create file and store data
+                // In Windows, '>' creates/overwrites a file
+                bat "echo ${params.USERNAME} > user.txt"
+                
+                // Bonus: Verify by reading the file back
+                bat "type user.txt"
             }
         }
-
-        stage('Test') {
-            steps {
-                bat 'mvn test'
-            }
-        }
-
-        stage('Package') {
-            steps {
-                bat 'mvn package'
-            }
-        }
-
-        stage('Archive Artifacts') {
-            steps {
-                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
-            }
-        }
-
     }
 }
