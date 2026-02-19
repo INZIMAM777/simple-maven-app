@@ -1,40 +1,56 @@
 pipeline {
     agent any
     
-    parameters {
-        string(name: 'USERNAME', defaultValue: 'Guest', description: 'Enter your name')
-    }
-
     stages {
-        stage('Checkout') {
+        stage('Version 1: Manual Approval') {
             steps {
-                // Task 1: Pulls latest code from GitHub
+                // Task 1: Checkout
                 checkout scm
+                // Task 2: Input step
+                input message: 'Proceed with Build?', ok: 'Yes, Proceed'
+                // Task 3: Confirmation
+                echo "Build approved by user. Proceeding..."
             }
         }
-        
-        stage('Execute Commands') {
-            steps {
-                // Task 2: Print the parameter
-                echo "The user is: ${params.USERNAME}"
-                
-                // Task 3: Use BAT to create file and store data
-                // In Windows, '>' creates/overwrites a file
-                bat "echo ${params.USERNAME} > user.txt"
-                
-                // Bonus: Verify by reading the file back
-                bat "type user.txt"
 
-                
+        stage('Version 2: Input Parameter') {
+            steps {
+                // Task 2: Accept parameter during execution (not at start)
+                script {
+                    def userInput = input(
+                        id: 'userInput', message: 'Enter Approval Note:', parameters: [
+                            string(defaultValue: 'Approved', name: 'CONFIRM_NOTE')
+                        ]
+                    )
+                    // Task 3: Execute BAT command
+                    bat "echo Approval Note: ${userInput}"
+                }
             }
         }
-        stage('Final Report') {
-    steps {
-        bat "date /t"             // Version 2 Task
-        bat "type user.txt"       // Version 4 Task
-        bat "echo Lab Complete > status.txt"
-        bat "type status.txt"
-    }
-}
+
+        stage('Version 3: System Info') {
+            steps {
+                // Task 2: Print Build Number
+                echo "Current Jenkins Build Number: ${env.BUILD_NUMBER}"
+                // Task 3: Status Message
+                echo "Version 3 Status: Execution Successful"
+            }
+        }
+
+        stage('Version 4: Save to File') {
+            steps {
+                script {
+                    // Task 2: Accept text parameter
+                    def finalParam = input(
+                        id: 'finalText', message: 'Enter text to save:', parameters: [
+                            string(name: 'DATA')
+                        ]
+                    )
+                    // Task 3: Save to file using BAT
+                    bat "echo ${finalParam} > experiment4_output.txt"
+                    bat "type experiment4_output.txt"
+                }
+            }
+        }
     }
 }
